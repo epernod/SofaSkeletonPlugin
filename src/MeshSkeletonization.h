@@ -63,137 +63,134 @@ using namespace sofa::defaulttype;
 namespace cgal
 {
 
-    template <class DataTypes>
-    class MeshSkeletonization : public sofa::core::DataEngine 
+template <class DataTypes>
+class MeshSkeletonization : public sofa::core::DataEngine 
+{
+public:
+    SOFA_CLASS(SOFA_TEMPLATE(MeshSkeletonization,DataTypes),sofa::core::DataEngine);
+
+    typedef typename DataTypes::Coord Coord;
+    typedef typename DataTypes::VecCoord VecCoord;
+    typedef typename Coord::value_type Real;
+    typedef type::Vec<3,Real> Vec3;
+
+    // Typedefs SOFA Topology
+    using Triangle = sofa::core::topology::BaseMeshTopology::Triangle;
+    using SeqTriangles = sofa::core::topology::BaseMeshTopology::SeqTriangles;
+
+    // Inputs 
+    sofa::core::objectmodel::Data<VecCoord> m_inVertices; ///< List of vertices
+    sofa::core::objectmodel::Data<SeqTriangles> m_inTriangles; ///< List of triangles
+    sofa::core::objectmodel::DataFileName m_inFile; ///< File path
+        
+private:
+    MeshSkeletonization();
+    virtual ~MeshSkeletonization() { }
+
+    void init() override;
+    void reinit() override;
+    void doUpdate() override;
+
+    void draw(const sofa::core::visual::VisualParams* vparams) override;
+
+    virtual std::string getTemplateName() const override {
+        return templateName(this);
+    }
+
+    static std::string templateName(const MeshSkeletonization<DataTypes>* = NULL) {
+        return DataTypes::Name();
+    }
+
+    // convert a set of vertices and tringles to polyhedron 
+    void geometryToPolyhedron(Polyhedron &s); 
+
+    // Parameters
+    sofa::core::objectmodel::DataFileName m_filename;   
+
+    // Members	
+    Skeleton m_skeleton;
+
+
+    template <class HDS>
+    class geometryToPolyhedronOp : public CGAL::Modifier_base<HDS> 
     {
         public:
-            SOFA_CLASS(SOFA_TEMPLATE(MeshSkeletonization,DataTypes),sofa::core::DataEngine);
-
+            typedef typename DataTypes::Real Real;
             typedef typename DataTypes::Coord Coord;
             typedef typename DataTypes::VecCoord VecCoord;
-            typedef typename Coord::value_type Real;
-            typedef type::Vec<3,Real> Vec3;
 
-            // Typedefs SOFA Topology
-            using Triangle = sofa::core::topology::BaseMeshTopology::Triangle;
-            using SeqTriangles = sofa::core::topology::BaseMeshTopology::SeqTriangles;
+            typedef HDS Halfedge_data_structure;
 
-            // Inputs 
-            sofa::core::objectmodel::Data<VecCoord> m_inVertices; ///< List of vertices
-            sofa::core::objectmodel::Data<SeqTriangles> m_inTriangles; ///< List of triangles
-            sofa::core::objectmodel::DataFileName m_inFile; ///< File path
-
-        
         private:
-            MeshSkeletonization();
-            virtual ~MeshSkeletonization() { }
+            VecCoord m_vertices;
+            SeqTriangles m_triangles;
 
-            void init() override;
-            void reinit() override;
-
-            void doUpdate() override;
-
-            void draw(const sofa::core::visual::VisualParams* vparams) override;
-
-            virtual std::string getTemplateName() const override {
-                return templateName(this);
+        public:
+            geometryToPolyhedronOp(const VecCoord &vertices, const SeqTriangles &triangles) {
+                m_vertices = vertices;
+                m_triangles = triangles;
             }
 
-            static std::string templateName(const MeshSkeletonization<DataTypes>* = NULL) {
-                return DataTypes::Name();
+            void operator()( HDS& hds) 
+            {
+                unsigned int numVertices = m_vertices.size();
+                unsigned int numTriangles = m_triangles.size();
+
+                CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> builder(hds, true);
+                builder.begin_surface(numVertices, numTriangles);
+
+                for (unsigned int i = 0; i < numVertices; i++)
+                {
+                    builder.add_vertex( Point( m_vertices[i][0], m_vertices[i][1], m_vertices[i][2] ));
+                }
+
+                for (unsigned int i = 0; i < numTriangles; i++ )
+                {
+                    builder.begin_facet();
+                    for ( int j = 0; j < 3; j++ )
+                    {
+                        builder.add_vertex_to_facet( m_triangles[i][j] );
+                    }
+                    builder.end_facet();
+                }
+
+                if (builder.check_unconnected_vertices())
+                {
+                    builder.remove_unconnected_vertices();
+                }
+
+                builder.end_surface();
             }
-
-            // convert a set of vertices and tringles to polyhedron 
-            void geometryToPolyhedron(Polyhedron &s); 
-
-            // Parameters
-            sofa::core::objectmodel::DataFileName m_filename;   
-
-            // Members	
-            Skeleton m_skeleton;
+    };
 
 
-            template <class HDS>
-            class geometryToPolyhedronOp : public CGAL::Modifier_base<HDS> {
-                public:
-                    typedef typename DataTypes::Real Real;
-                    typedef typename DataTypes::Coord Coord;
-                    typedef typename DataTypes::VecCoord VecCoord;
-
-                    typedef HDS Halfedge_data_structure;
-
-                private:
-
-                    VecCoord m_vertices;
-                    SeqTriangles m_triangles;
-
-                public:
-                    geometryToPolyhedronOp(const VecCoord &vertices, const SeqTriangles &triangles) {
-                        m_vertices = vertices;
-                        m_triangles = triangles;
-                    }
-
-                    void operator()( HDS& hds) {
-
-                        unsigned int numVertices = m_vertices.size();
-                        unsigned int numTriangles = m_triangles.size();
-
-                        CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> builder(hds, true);
-                        builder.begin_surface(numVertices, numTriangles);
-
-                        for (unsigned int i = 0; i < numVertices; i++)
-                        {
-                            builder.add_vertex( Point( m_vertices[i][0], m_vertices[i][1], m_vertices[i][2] ));
-                        }
-
-                        for (unsigned int i = 0; i < numTriangles; i++ )
-                        {
-                            builder.begin_facet();
-                            for ( int j = 0; j < 3; j++ )
-                            {
-                                builder.add_vertex_to_facet( m_triangles[i][j] );
-                            }
-                            builder.end_facet();
-                        }
-
-                        if (builder.check_unconnected_vertices())
-                        {
-                            builder.remove_unconnected_vertices();
-                        }
-
-                        builder.end_surface();
-                    }
-            };
-
-
-            struct Export_polylines{
-                const Skeleton& skeleton;
-                std::ofstream& OutputP;
+    struct Export_polylines
+    {
+        const Skeleton& skeleton;
+        std::ofstream& OutputP;
         
-                Export_polylines(
-                                    const Skeleton& skeleton, 
-                                    std::ofstream& OutputP
-                                )
-                    : skeleton(skeleton), OutputP(OutputP) {
+        Export_polylines(const Skeleton& skeleton, std::ofstream& OutputP)
+            : skeleton(skeleton), OutputP(OutputP) 
+        { }
 
-                    }
-
-                void start_new_polyline() {
+        void start_new_polyline() {
                     
-                }
-                void add_node(Skeleton_vertex v) {
-                    OutputP << skeleton[v].point[0] << " " << skeleton[v].point[1] << " " << skeleton[v].point[2] << "\n";
+        }
 
-                }
-                void end_polyline(){
-                    OutputP << "\n";
-                }
-            };
+        void add_node(Skeleton_vertex v) {
+            OutputP << skeleton[v].point[0] << " " << skeleton[v].point[1] << " " << skeleton[v].point[2] << "\n";
+        }
 
-    }; // MeshSkeletonization
+        void end_polyline() {
+            OutputP << "\n";
+        }
+    };
+
+}; // MeshSkeletonization
+
 
 #if !defined(MESHSKELETONIZATION_CPP)
 extern template class SOFA_MeshSkeletonizationPlugin_API MeshSkeletonization<defaulttype::Vec3Types>;
 #endif
 
-} //cgal
+} // namespace cgal

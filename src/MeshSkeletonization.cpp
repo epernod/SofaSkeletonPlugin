@@ -33,6 +33,9 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
 
+namespace cgal
+{
+
 using namespace sofa::defaulttype;
 using namespace cgal;
 
@@ -41,3 +44,5 @@ const int MeshSkeletonizationClass = sofa::core::RegisterObject("Ouput the skele
         ;
 
 template class SOFA_MeshSkeletonizationPlugin_API cgal::MeshSkeletonization<Vec3Types>;
+
+} // namespace cgal
