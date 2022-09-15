@@ -46,7 +46,7 @@ MeshSkeletonization<DataTypes>::MeshSkeletonization()
     addInput(&m_inTriangles);
     addInput(&m_filename);
 
-    addInput(&m_outFile);
+    addOutput(&m_outFile);
 }
 
 
@@ -58,10 +58,7 @@ void MeshSkeletonization<DataTypes>::init()
     {
         msg_error() << "No input File to store the skeleton data, please set a inputFile path.";
         return;
-    }           
-
-    doUpdate();
-
+    }
 }
 
 
