@@ -28,42 +28,30 @@
 
 #pragma once
 
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/DataEngine.h>
-#include <sofa/core/behavior/MechanicalState.h>
-#include <sofa/core/topology/BaseMeshTopology.h>
-#include <sofa/core/visual/VisualModel.h>
-#include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 
+#include <sofa/core/topology/BaseMeshTopology.h>
+#include <sofa/core/visual/VisualParams.h>
+
+
+#include <CGAL/Modifier_base.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
-#include <CGAL/IO/Polyhedron_iostream.h>
-#include <CGAL/Polyhedron_incremental_builder_3.h>
-#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
 
-// Adaptor for Polyhedron_3
-#include <CGAL/Surface_mesh_simplification/HalfedgeGraph_Polyhedron_3.h>
-
-// Skeletonization function
+//// Skeletonization function
 #include <CGAL/extract_mean_curvature_flow_skeleton.h>
 #include <CGAL/boost/graph/split_graph_into_polylines.h>
 #include <CGAL/Mean_curvature_flow_skeletonization.h>
 
-// Typedefs SOFA
-typedef sofa::core::topology::BaseMeshTopology::Edge Edge;
-typedef sofa::core::topology::BaseMeshTopology::Triangle Triangle;
-typedef sofa::core::topology::BaseMeshTopology::SeqEdges SeqEdges;
-typedef sofa::core::topology::BaseMeshTopology::SeqTriangles SeqTriangles;
-
-// Typedefs CGAL
+//// Typedefs CGAL
 typedef CGAL::Simple_cartesian<double> Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
 typedef Polyhedron::HalfedgeDS HalfedgeDS;
 typedef Kernel::Point_3 Point;
 
-typedef boost::graph_traits<Polyhedron>::vertex_descriptor vertex_descriptor;
 typedef CGAL::Mean_curvature_flow_skeletonization<Polyhedron> Skeletonization;
 typedef Skeletonization::Skeleton Skeleton;
 typedef Skeleton::vertex_descriptor Skeleton_vertex;
@@ -76,15 +64,19 @@ namespace cgal
 {
 
     template <class DataTypes>
-    class MeshSkeletonization : public sofa::core::DataEngine {
-        
+    class MeshSkeletonization : public sofa::core::DataEngine 
+    {
         public:
             SOFA_CLASS(SOFA_TEMPLATE(MeshSkeletonization,DataTypes),sofa::core::DataEngine);
 
             typedef typename DataTypes::Coord Coord;
             typedef typename DataTypes::VecCoord VecCoord;
             typedef typename Coord::value_type Real;
-            typedef Vec<3,Real> Vec3;
+            typedef type::Vec<3,Real> Vec3;
+
+            // Typedefs SOFA Topology
+            using Triangle = sofa::core::topology::BaseMeshTopology::Triangle;
+            using SeqTriangles = sofa::core::topology::BaseMeshTopology::SeqTriangles;
 
             // Inputs 
             sofa::core::objectmodel::Data<VecCoord> m_inVertices; ///< List of vertices
@@ -200,11 +192,8 @@ namespace cgal
 
     }; // MeshSkeletonization
 
-#if  !defined(MeshSkeletonizationPlugin_MeshSkeletonization_CPP)
+#if !defined(MESHSKELETONIZATION_CPP)
 extern template class SOFA_MeshSkeletonizationPlugin_API MeshSkeletonization<defaulttype::Vec3Types>;
- 
 #endif
 
 } //cgal
-
-
