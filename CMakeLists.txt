@@ -14,8 +14,9 @@ set(SOURCE_FILES
 set(README_FILES MeshSkeletonizationPlugin.txt)
 
 # Dependencies
-find_package(SofaFramework REQUIRED)
-find_package(SofaSimulationCommon REQUIRED)
+find_package(Sofa.Core REQUIRED)
+find_package(Sofa.Type REQUIRED)
+
 find_package(CGAL REQUIRED)
 message(STATUS "CGAL VERSION = ${CGAL_VERSION}")
 
@@ -29,9 +30,8 @@ if(CGAL_VERSION VERSION_GREATER 4.9) # if CGAL >= 4.10
 endif()
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} PUBLIC SofaCore SofaSimulationCommon)
+target_link_libraries(${PROJECT_NAME} PUBLIC Sofa.Core Sofa.Type)
 target_link_libraries(${PROJECT_NAME} PUBLIC CGAL::CGAL)
-
 
 
 # Install rules for the library and the headers; CMake package configurations files

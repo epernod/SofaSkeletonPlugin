@@ -25,7 +25,7 @@
  * Last update: 15 of June 2021
  * Author: Nazim Haouchine & Sidaty El Hadramy
  */
-#define SkeletonPlugin_DECIMETEMESH_CPP
+#define MESHSKELETONIZATION_CPP
 
 #include <config.h.in>
 #include <MeshSkeletonization.inl>
@@ -36,7 +36,7 @@
 using namespace sofa::defaulttype;
 using namespace cgal;
 
-int MeshSkeletonizationClass = sofa::core::RegisterObject("Ouput the skeleton of a triangulated mesh, from .off file or .obj (MeshLoader) using CGAL")
+const int MeshSkeletonizationClass = sofa::core::RegisterObject("Ouput the skeleton of a triangulated mesh, from .off file or .obj (MeshLoader) using CGAL")
         .add< MeshSkeletonization<Vec3Types> >()
         ;
 

@@ -30,16 +30,7 @@
 
 #include <MeshSkeletonization.h>
 
-#include <iostream>
-#include <fstream>
-
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-#include <sofa/core/objectmodel/KeypressedEvent.h>
-#include <sofa/core/objectmodel/KeyreleasedEvent.h>
-
 using namespace sofa::core::objectmodel;
-
 
 namespace cgal {
 
