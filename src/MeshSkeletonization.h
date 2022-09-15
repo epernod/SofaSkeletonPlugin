@@ -88,18 +88,9 @@ private:
     virtual ~MeshSkeletonization() { }
 
     void init() override;
-    void reinit() override;
     void doUpdate() override;
 
     void draw(const sofa::core::visual::VisualParams* vparams) override;
-
-    virtual std::string getTemplateName() const override {
-        return templateName(this);
-    }
-
-    static std::string templateName(const MeshSkeletonization<DataTypes>* = NULL) {
-        return DataTypes::Name();
-    }
 
     // convert a set of vertices and tringles to polyhedron 
     void geometryToPolyhedron(Polyhedron &s); 
