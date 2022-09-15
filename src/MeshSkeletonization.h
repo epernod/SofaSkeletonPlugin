@@ -81,7 +81,7 @@ public:
     // Inputs 
     sofa::core::objectmodel::Data<VecCoord> m_inVertices; ///< List of vertices
     sofa::core::objectmodel::Data<SeqTriangles> m_inTriangles; ///< List of triangles
-    sofa::core::objectmodel::DataFileName m_inFile; ///< File path
+    sofa::core::objectmodel::DataFileName m_outFile; ///< File path to export skeleton
         
 private:
     MeshSkeletonization();

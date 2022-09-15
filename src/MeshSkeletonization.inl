@@ -39,13 +39,14 @@ template <class DataTypes>
 MeshSkeletonization<DataTypes>::MeshSkeletonization()
     : m_inVertices(initData (&m_inVertices, "inputVertices", "List of input mesh vertices"))
     , m_inTriangles(initData(&m_inTriangles, "inputTriangles", "List of input mesh triangles"))
-    , m_inFile(initData(&m_inFile, "inputFile", "File path"))
+    , m_outFile(initData(&m_outFile, "outputSkeleton", "File path to output skeleton file"))
     , m_filename(initData (&m_filename, "filename", "Input mesh in .off format")) 
 {
     addInput(&m_inVertices);
     addInput(&m_inTriangles);
-    addInput(&m_inFile);
     addInput(&m_filename);
+
+    addInput(&m_outFile);
 }
 
 
@@ -53,7 +54,7 @@ template <class DataTypes>
 void MeshSkeletonization<DataTypes>::init() 
 {
     //Input
-    if(m_inFile.getValue().empty())
+    if(m_outFile.getValue().empty())
     {
         msg_error() << "No input File to store the skeleton data, please set a inputFile path.";
         return;
@@ -103,11 +104,13 @@ void MeshSkeletonization<DataTypes>::doUpdate()
     std::cout << "Number of vertices of the output skeleton: " << boost::num_vertices(m_skeleton) << std::endl;
     std::cout << "Number of edges of the output skeleton: " << boost::num_edges(m_skeleton) << std::endl;
 
-    std::ofstream OutputP(m_inFile.getValue(), std::ofstream::out | std::ofstream::trunc);
-    Export_polylines extractor(m_skeleton, OutputP);
-    CGAL::split_graph_into_polylines(m_skeleton, extractor);
-    OutputP.close();
-
+    if (m_outFile.isSet())
+    {
+        std::ofstream OutputP(m_outFile.getFullPath(), std::ofstream::out | std::ofstream::trunc);
+        Export_polylines extractor(m_skeleton, OutputP);
+        CGAL::split_graph_into_polylines(m_skeleton, extractor);
+        OutputP.close();
+    }
 }
 
 
