@@ -64,21 +64,13 @@ void MeshSkeletonization<DataTypes>::init()
 }
 
 
-template<class DataTypes>
-void MeshSkeletonization<DataTypes>::reinit() {
-} // end reinit
-
-
 template <class DataTypes>
 void MeshSkeletonization<DataTypes>::geometryToPolyhedron(Polyhedron &s)
 {
     VecCoord inVertices = m_inVertices.getValue();
     SeqTriangles inTriangles = m_inTriangles.getValue();
 
-    typedef Polyhedron::HalfedgeDS HalfedgeDS;
-    typedef geometryToPolyhedronOp<HalfedgeDS> GTSO;
-
-    GTSO gen(inVertices, inTriangles);
+    geometryToPolyhedronOp<HalfedgeDS> gen(inVertices, inTriangles);
     s.delegate(gen);
 }
 
@@ -88,12 +80,15 @@ void MeshSkeletonization<DataTypes>::doUpdate()
 {
     Polyhedron tmesh;
 
-    if(m_filename.getFullPath() != "") {
+    if(m_filename.getFullPath() != "") 
+    {
         const char* filename = m_filename.getFullPath().c_str();
         std::ifstream input(filename);
         input >> tmesh;
         std::cout << "Loading Polyhedron from file." << std::endl;
-    } else {
+    } 
+    else 
+    {
         geometryToPolyhedron(tmesh);
         std::cout << "Loading Polyhedron from MeshObjLoader." << std::endl;
         std::cout << "Number of vertices of the input mesh: " << boost::num_vertices(tmesh) << std::endl;
